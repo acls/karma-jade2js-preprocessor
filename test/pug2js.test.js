@@ -1,5 +1,5 @@
 var expect = require('expect.js');
-var jade2js = require('../lib/jade2js');
+var pug2js = require('../lib/pug2js');
 var LOGGER_STUB = {
   create: function () {
     return {
@@ -9,19 +9,19 @@ var LOGGER_STUB = {
 };
 var BASE_PATH_STUB = 'foo';
 var FILE_STUB = {
-  originalPath: '/tmp/original/path.jade',
+  originalPath: '/tmp/original/path.pug',
   path: '/tmp/new/path'
 };
 
-describe('jade2js', function() {
+describe('pug2js', function() {
 
   describe('default behavior (no config)', function() {
-    var compileFn = jade2js(LOGGER_STUB, BASE_PATH_STUB);
+    var compileFn = pug2js(LOGGER_STUB, BASE_PATH_STUB);
     var html;
 
     before(function(done) {
-      var JADE_SNIPPET = 'h1 This is a bland message';
-      compileFn(JADE_SNIPPET, FILE_STUB, function(result) {
+      var PUG_SNIPPET = 'h1 This is a bland message';
+      compileFn(PUG_SNIPPET, FILE_STUB, function(result) {
         html = result;
         done();
       });
@@ -29,20 +29,21 @@ describe('jade2js', function() {
 
     it('should succeed', function() {
       expect(html).to.contain('/tmp/original/path.html');
-      expect(html).to.contain('[]).run([\'$templateCache\', function($templateCache)');
+      expect(html).to.contain('window.__html__ = window.__html__ || {};');
+      expect(html).to.contain('__html__[');
     });
 
   });
 
-  describe('with module name', function() {
-    var compileFn = jade2js(LOGGER_STUB, BASE_PATH_STUB, {
-      moduleName: 'foo'
+  describe('with cache name', function() {
+    var compileFn = pug2js(LOGGER_STUB, BASE_PATH_STUB, {
+      cacheName: 'foo',
     });
     var html;
 
     before(function(done) {
-      var JADE_SNIPPET = 'h1 This is a bland message';
-      compileFn(JADE_SNIPPET, FILE_STUB, function(result) {
+      var PUG_SNIPPET = 'h1 This is a bland message';
+      compileFn(PUG_SNIPPET, FILE_STUB, function(result) {
         html = result;
         done();
       });
@@ -50,12 +51,13 @@ describe('jade2js', function() {
 
     it('should succeed', function() {
       expect(html).to.contain('/tmp/original/path.html');
-      expect(html).to.contain('module.run([\'$templateCache\', function($templateCache)');
+      expect(html).to.contain('window.foo = window.foo || {};');
+      expect(html).to.contain('foo[');
     });
 
   });
 
-  describe('jade locals', function() {
+  describe('pug locals', function() {
 
     var LOCALS_CONFIG = {
       locals: {
@@ -63,12 +65,12 @@ describe('jade2js', function() {
       }
     };
 
-    var compileFn = jade2js(LOGGER_STUB, BASE_PATH_STUB, LOCALS_CONFIG);
+    var compileFn = pug2js(LOGGER_STUB, BASE_PATH_STUB, LOCALS_CONFIG);
     var html;
 
     before(function(done) {
-      var JADE_SNIPPET = 'h1= message';
-      compileFn(JADE_SNIPPET, FILE_STUB, function(result) {
+      var PUG_SNIPPET = 'h1= message';
+      compileFn(PUG_SNIPPET, FILE_STUB, function(result) {
         html = result;
         done();
       });
@@ -84,21 +86,21 @@ describe('jade2js', function() {
 
     var TRANSFORM_CONFIG = {
       cacheIdFromPath: function (path) {
-        return path.replace('.jst.jade', '.html');
+        return path.replace('.jst.pug', '.html');
       }
     };
 
     var TRANSFORM_FILE_STUB = {
-      originalPath: '/tmp/original/path.jst.jade',
+      originalPath: '/tmp/original/path.jst.pug',
       path: '/tmp/new/path'
     };
 
-    var compileFn = jade2js(LOGGER_STUB, BASE_PATH_STUB, TRANSFORM_CONFIG);
+    var compileFn = pug2js(LOGGER_STUB, BASE_PATH_STUB, TRANSFORM_CONFIG);
     var html;
 
     before(function(done) {
-      var JADE_SNIPPET = 'h1 Hello World';
-      compileFn(JADE_SNIPPET, TRANSFORM_FILE_STUB, function(result) {
+      var PUG_SNIPPET = 'h1 Hello World';
+      compileFn(PUG_SNIPPET, TRANSFORM_FILE_STUB, function(result) {
         html = result;
         done();
       });
@@ -110,34 +112,35 @@ describe('jade2js', function() {
 
   });
 
-  describe('Jade config object', function() {
-    var jade = require('jade');
+  describe('Pug config object', function() {
+    var pug = require('pug');
     var originalCompile;
     var callOptions;
 
     before(function() {
-      originalCompile = jade.compile;
-      jade.compile = function(template, options) {
+      originalCompile = pug.compile;
+      pug.compile = function(template, options) {
         callOptions = options;
         return function() { return ''; };
       };
     });
 
     after(function() {
-      jade.compile = originalCompile;
+      pug.compile = originalCompile;
       callOptions = null;
     });
 
-    it('should pass Jade config object to Jade compile function', function(done) {
+    it('should pass Pug config object to Pug compile function', function(done) {
       var config = {
-        jadeOptions: {
+        // lib: 'pug',
+        pugOptions: {
           a: 1,
           b: 2
         }
       };
-      var compileFn = jade2js(LOGGER_STUB, BASE_PATH_STUB, config);
+      var compileFn = pug2js(LOGGER_STUB, BASE_PATH_STUB, config);
       compileFn('h1', FILE_STUB, function() {
-        expect(callOptions).to.eql(config.jadeOptions);
+        expect(callOptions).to.eql(config.pugOptions);
         done();
       });
     });

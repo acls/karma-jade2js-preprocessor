@@ -1,27 +1,16 @@
-# karma-ng-jade2js-preprocessor
+# karma-pug2js-preprocessor
 
-> Preprocessor for converting jade files to [AngularJS](http://angularjs.org/) templates.
+> Preprocessor for converting pug template files to javascript.
 
-Forked from [karma-ng-html2js-preprocessor](https://github.com/karma-runner/karma-ng-html2js-preprocessor)
+Forked from [karma-ng-jade2js-preprocessor](https://github.com/chmanie/karma-ng-jade2js-preprocessor)
 
-[![Build Status](https://travis-ci.org/chmanie/karma-ng-jade2js-preprocessor.svg)](https://travis-ci.org/chmanie/karma-ng-jade2js-preprocessor)
+<!-- [![Build Status](https://travis-ci.org/chmanie/karma-jade2js-preprocessor.svg)](https://travis-ci.org/chmanie/karma-jade2js-preprocessor) -->
 
-## Installation
+<!-- ## Installation
 
-The easiest way is to keep `karma-ng-jade2js-preprocessor` as a devDependency in your `package.json`.
-```json
-{
-  "devDependencies": {
-    "karma": "~0.12",
-    "karma-ng-jade2js-preprocessor": "~0.2"
-  }
-}
-```
-
-You can simple do it by:
 ```bash
-npm install karma-ng-jade2js-preprocessor --save-dev
-```
+npm install karma-pug2js-preprocessor --save-dev
+``` -->
 
 ## Configuration
 ```js
@@ -29,7 +18,7 @@ npm install karma-ng-jade2js-preprocessor --save-dev
 module.exports = function(config) {
   config.set({
     preprocessors: {
-      '**/*.jade': ['ng-jade2js']
+      '**/*.jade': ['pug2js']
     },
 
     files: [
@@ -39,14 +28,17 @@ module.exports = function(config) {
       '**/*.jade'
     ],
 
-    ngJade2JsPreprocessor: {
+    pug2JsPreprocessor: {
+      // Can be pug or jade (defaults to pug_. Used for file extensions and require.
+      lib: 'jade',
+
       // strip this from the file path
       stripPrefix: 'public/',
 
       // prepend this to the
       prependPrefix: 'served/',
 
-      // By default, Jade files are added to template cache with '.html' extension.
+      // By default, Jade/Pug files are added to template cache with '.html' extension.
       // Set this option to change it.
       templateExtension: 'html',
 
@@ -55,19 +47,18 @@ module.exports = function(config) {
         return filepath.replace(/\.jade$/, '.html');
       },
 
-      // Support for jade locals to render at compile time
+      // Support for pug locals to render at compile time
       locals: {
         foo: 'bar'
       },
 
-      // setting this option will create only a single module that contains templates
-      // from all the files, so you can load them all with module('foo')
-      moduleName: 'foo',
+      // set the global cache name for the templates (defaults to templateCache)
+      cacheName: 'foo',
 
-      // Jade compiler options. For a list of possible options, consult Jade documentation.
-      jadeOptions: {
+      // Jade/Pug compiler options. For a list of possible options, consult Jade/Pug documentation.
+      pugOptions: {
         doctype: 'xml'
-      }
+      },
     }
   });
 };
