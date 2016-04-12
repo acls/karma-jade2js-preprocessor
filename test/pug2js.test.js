@@ -8,12 +8,16 @@ var LOGGER_STUB = {
   }
 };
 var BASE_PATH_STUB = 'foo';
-var FILE_STUB = {
-  originalPath: '/tmp/original/path.pug',
-  path: '/tmp/new/path'
-};
 
 describe('pug2js', function() {
+  var FILE_STUB;
+
+  before(function() {
+    FILE_STUB = {
+      originalPath: '/tmp/original/path.pug',
+      path: '/tmp/new/path.pug'
+    };
+  });
 
   describe('default behavior (no config)', function() {
     var compileFn = pug2js(LOGGER_STUB, BASE_PATH_STUB);
@@ -143,6 +147,20 @@ describe('pug2js', function() {
         expect(callOptions).to.eql(config.pugOptions);
         done();
       });
+    });
+  });
+
+  describe('Filepath', function() {
+    var compileFn;
+
+    before(function() {
+      compileFn = pug2js(LOGGER_STUB, BASE_PATH_STUB);
+      compileFn('h1', FILE_STUB, function() {});
+      compileFn('h1', FILE_STUB, function() {});
+    });
+
+    it('should rename filepath extension to .html.js', function() {
+      expect(FILE_STUB.path).to.eql('/tmp/new/path.html.js');
     });
   });
 });
